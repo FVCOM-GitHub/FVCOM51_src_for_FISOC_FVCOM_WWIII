@@ -161,8 +161,8 @@ CONTAINS
     CALL READ_MEANFLOW_RST
 # endif
 
-# if defined (WAVE_CURRENT_INTERACTION) && !defined (FISOC_COUPLING)
-    CALL READ_WAVE
+# if defined (WAVE_CURRENT_INTERACTION)
+   CALL READ_WAVE
 # endif
 
 # if defined (DYE_RELEASE)
@@ -214,7 +214,7 @@ CONTAINS
   endif
 # endif
 
-# if defined (WAVE_CURRENT_INTERACTION) && !defined (FISOC_COUPLING)
+# if defined (WAVE_CURRENT_INTERACTION)
     CALL READ_WAVE
 # endif
 
@@ -2197,20 +2197,24 @@ CONTAINS
  END SUBROUTINE READ_MEANFLOW_RST
 # endif
 
-# if defined (WAVE_CURRENT_INTERACTION) && !defined (FISOC_COUPLING)
+# if defined (WAVE_CURRENT_INTERACTION)
 !==============================================================================!
   SUBROUTINE READ_WAVE
+# if !defined (FISOC_COUPLING)
     USE M_GENARR
     USE SWCOMM3
     USE VARS_WAVE, ONLY : AC2,COMPDA
-    
+# else
+     USE VARS_WAVE, ONLY : HSC1,TPEAK,DIRDEG1,WLEN
+# endif
+
     IMPLICIT NONE
     TYPE(NCVAR),  POINTER :: VAR
     TYPE(NCDIM),  POINTER :: DIM
     LOGICAL :: FOUND
     INTEGER :: STKCNT
     
-    REAL(SP), ALLOCATABLE :: HS_TMP(:),TPEAK_TMP(:),WDIR_TMP(:)
+    REAL(SP), ALLOCATABLE :: HS_TMP(:),TPEAK_TMP(:),WDIR_TMP(:),WLEN_TMP(:)
     REAL(SP), ALLOCATABLE :: AC2_TMP(:)
     INTEGER :: IG
     INTEGER :: IP, IDC, ISC                                             
@@ -2221,6 +2225,7 @@ CONTAINS
     ALLOCATE(HS_TMP(0:MT))       ;HS_TMP    = 0.0_SP
     ALLOCATE(TPEAK_TMP(0:MT))    ;TPEAK_TMP = 0.0_SP
     ALLOCATE(WDIR_TMP(0:MT))     ;WDIR_TMP  = 0.0_SP
+    ALLOCATE(WLEN_TMP(0:MT))     ;WLEN_TMP  = 0.0_SP
    
     STKCNT = NC_START%FTIME%PREV_STKCNT
 
@@ -2247,8 +2252,21 @@ CONTAINS
     CALL NC_CONNECT_AVAR(VAR, WDIR_TMP)
     CALL NC_READ_VAR(VAR,STKCNT)
 
+    ! LOAD Wave Length
+    VAR => FIND_VAR(NC_START,'wlen',FOUND)
+    IF(.not. FOUND) CALL FATAL_ERROR("COULD NOT FIND VARIABLE 'wlen'&
+         & IN THE HOTSTART FILE OBJECT")
+    CALL NC_CONNECT_AVAR(VAR, WLEN_TMP)
+    CALL NC_READ_VAR(VAR,STKCNT)
+
+# if defined (FISOC_COUPLING)
+    HSC1=HS_TMP
+    TPEAK=TPEAK_TMP
+    DIRDEG1= WDIR_TMP
+    WLEN = WLEN_TMP
+# else
     SPPARM_TMP(1:4) = SPPARM(1:4)
-    
+
     DO IG = 1, M
      SPPARM(1) = HS_TMP(IG)
      SPPARM(2) = TPEAK_TMP(IG)                                             
@@ -2279,9 +2297,10 @@ CONTAINS
 #   endif
 
     SPPARM(1:4) = SPPARM_TMP(1:4)
-    DEALLOCATE(HS_TMP,TPEAK_TMP,WDIR_TMP)
+    DEALLOCATE(HS_TMP,TPEAK_TMP,WDIR_TMP,WLEN_TMP)
     
     CALL SWANOUT(COMPDA(1,JDP2))
+# endif
     
    IF(DBG_SET(DBG_SBR)) write(ipt,*) "End: READ_WAVE" 
    

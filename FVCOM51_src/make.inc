@@ -166,7 +166,7 @@ endif
 #                           UNCOMMENT TO INCLUDE FLOODYING/DRYING
 #--------------------------------------------------------------------------
 
-#             FLAG_3 = -DWET_DRY
+             FLAG_3 = -DWET_DRY
 
 #--------------------------------------------------------------------------
 #        MULTI_PROCESSOR    INCLUDES PARALLELIZATION WITH MPI
@@ -307,7 +307,7 @@ endif
 #       RIVER INPUT FILES!
 #--------------------------------------------------------------------------
 
-#            FLAG_14 = -DRIVER_FLOAT
+            FLAG_14 = -DRIVER_FLOAT
 
 #--------------------------------------------------------------------------
 #        The TVD (total variational diminishing) option for FVCOM was developed by 
@@ -437,7 +437,7 @@ endif
 #         AIR_PRESSURE FROM SURFACE FORCING                           
 #--------------------------------------------------------------------------
 
-#            FLAG_28 = -DAIR_PRESSURE  
+            FLAG_28 = -DAIR_PRESSURE  
 
 #--------------------------------------------------------------------------
 # Visit online simulation mode

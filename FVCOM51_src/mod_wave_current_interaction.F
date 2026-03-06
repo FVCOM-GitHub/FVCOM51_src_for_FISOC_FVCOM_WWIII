@@ -377,6 +377,14 @@ MODULE MOD_WAVE_CURRENT_INTERACTION
      END DO  
     END IF
    END DO  
+! lwang@0202,2026
+   do i = 1,m
+      if (d(i)<1.1) then
+         sxx(i,:) = 0
+         syy(i,:) = 0
+         sxy(i,:) = 0
+      endif
+   enddo
 
 # if defined(MULTIPROCESSOR)
    IF(PAR)CALL NODE_MATCH(1,NBN,BN_MLT,BN_LOC,BNC,MT,KB,MYID,NPROCS,SXX,SXY,SYY)
@@ -1876,9 +1884,7 @@ END DO
 ! ------------------------------------------------------------------
 !
 !====================================================================================|  
-   SUBROUTINE CURRENT2WAVE
-   
-   USE CONTROL, ONLY : IINT       
+   SUBROUTINE CURRENT2WAVE       
 
    IMPLICIT NONE
 
